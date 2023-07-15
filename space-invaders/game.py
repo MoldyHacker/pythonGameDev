@@ -65,7 +65,7 @@ class AlienColumn:
         #     self.aliens.append(Alien(x, i + 60, alien_type, self))
 
         self.aliens = [
-            Alien(x, i * 60, alien_type, self)
+            Alien(x, y + i * 60, alien_type, self)
             for i, alien_type in alien_types
         ]
 
@@ -134,6 +134,7 @@ class PlayerCannon(Actor):
 
         print(left_edge, self.x, right_edge)
 
+        # TODO: fix the edge collision bug
         if left_edge <= self.x <= right_edge:
             self.move(self.speed * horizontal_movement * delta_time)
 
@@ -164,12 +165,6 @@ class HUD(Layer):
         game_over_text.position = (w * 0.5, h * 0.5)
         self.add(game_over_text)
 
-    # def create_player(self):
-    #     self.player = PlayerCannon(self.width * 0.5, 50)
-    #
-    #     self.add(self.player)
-    #     self.hud.update_lives(self.lives)
-
 
 class GameLayer(Layer):
     def __init__(self, hud):
@@ -189,6 +184,8 @@ class GameLayer(Layer):
         self.update_score()
         self.create_player()
 
+        self.create_swarm(100, 300)
+
         self.schedule(self.game_loop)
 
     def create_player(self):
@@ -203,6 +200,13 @@ class GameLayer(Layer):
     def game_loop(self, delta_time):
         for _, actor in self.children:
             actor.update(delta_time)
+
+        self.swarm.update(delta_time)
+
+    def create_swarm(self, x, y):
+        self.swarm = Swarm(x, y)
+        for alien in self.swarm:
+            self.add(alien)
 
 
 if __name__ == '__main__':
