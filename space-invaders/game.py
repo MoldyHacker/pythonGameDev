@@ -10,6 +10,10 @@ from pyglet.image import load as iload, ImageGrid, Animation
 from pyglet.media import load as mload
 from random import random
 
+shoot_sfx = mload('sfx/shoot.wav', streaming=False)
+kill_sfx = mload('sfx/invaderkilled.wav', streaming=False)
+die_sfx = mload('sfx/explosion.wav', streaming=False)
+
 
 def load_animation(image):
     seq = ImageGrid(iload(image), 2, 1)
@@ -82,6 +86,17 @@ class AlienColumn:
 
         return x >= width - 50 and direction == 1 or x <= 50 and direction == -1
 
+    # TODO: Increase difficulty by having the aliens shoot more frequently
+    def increase_difficulty(self):
+        self.rate_of_fire *= 5
+
+    def shoot(self):
+        if random() < 0.001 and len(self.aliens) > 0:
+            x, y = self.aliens[0].position
+            return AlienShoot(x, y - 50)
+        else:
+            return None
+
 
 class Swarm:
     def __init__(self, x, y):
@@ -94,7 +109,7 @@ class Swarm:
         self.direction = 1
 
         self.elapsed = 0.0
-        self.period = 1.0
+        self.period = 1.0  # TODO: increase the period to increase the difficulty. increase_difficulty()
 
     def side_reached(self):
         return any(map(lambda col: col.should_turn(self.direction), self.columns))
@@ -137,6 +152,45 @@ class PlayerCannon(Actor):
         # TODO: fix the edge collision bug
         if left_edge <= self.x <= right_edge:
             self.move(self.speed * horizontal_movement * delta_time)
+
+        is_firing = keyboard[key.SPACE]
+        if PlayerShoot.ACTIVE_SHOOT is None and is_firing:
+            self.parent.add(PlayerShoot(self.x, self.y + 50))
+
+        if PlayerShoot.ACTIVE_SHOOT is None and is_firing:
+            self.parent.add(PlayerShoot(self.x, self.y + 50))
+            shoot_sfx.play()
+
+
+class PlayerShoot(Actor):
+    ACTIVE_SHOOT = None
+
+    def __init__(self, x, y):
+        super().__init__('img/laser.png', x, y)
+        self.speed = Vector2(0, 400)
+        PlayerShoot.ACTIVE_SHOOT = self
+
+    def collide(self, other):
+        if isinstance(other, Alien):
+            self.parent.update_score(other.points)
+            other.kill()
+            self.kill()
+
+    def on_exit(self):
+        super().on_exit()
+        PlayerShoot.ACTIVE_SHOOT = None
+
+    def update(self, delta_time):
+        self.move(self.speed * delta_time)
+
+
+class AlienShoot(Actor):
+    def __init__(self, x, y):
+        super().__init__('img/shoot.png', x, y)
+        self.speed = Vector2(0, -400)
+
+    def update(self, delta_time):
+        self.move(self.speed * delta_time)
 
 
 class HUD(Layer):
@@ -198,6 +252,24 @@ class GameLayer(Layer):
         self.hud.update_score(self.score)
 
     def game_loop(self, delta_time):
+        self.collman.clear()
+        for _, actor in self.children:
+            self.collman.add(actor)
+            if not self.collman.knows(actor):
+                self.remove(actor)
+
+        if self.collide(PlayerShoot.ACTIVE_SHOOT):
+            kill_sfx.play()
+
+        if self.collide(self.player):
+            die_sfx.play()
+            self.respawn_player()
+
+        for column in self.swarm.columns:
+            shoot = column.shoot()
+            if shoot is not None:
+                self.add(shoot)
+
         for _, actor in self.children:
             actor.update(delta_time)
 
@@ -208,8 +280,27 @@ class GameLayer(Layer):
         for alien in self.swarm:
             self.add(alien)
 
+    def respawn_player(self):
+        self.lives -= 1
+        if self.lives < 0:
+            self.unschedule(self.game_loop)
+            self.hud.show_game_over('Game Over')
+        else:
+            self.create_player()
+
+    def collide(self, actor):
+        if actor is not None:
+            for other in self.collman.iter_colliding(actor):
+                actor.collide(other)
+                return True
+        return False
+
 
 if __name__ == '__main__':
+    song = mload('sfx/level1.ogg')
+    player = song.play()
+    player.loop = True
+
     director.init(caption='Space Invaders', width=800, height=650)
 
     keyboard = key.KeyStateHandler()
