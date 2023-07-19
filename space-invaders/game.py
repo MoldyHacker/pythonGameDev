@@ -10,9 +10,9 @@ from pyglet.image import load as iload, ImageGrid, Animation
 from pyglet.media import load as mload
 from random import random
 
-shoot_sfx = mload('sfx/shoot.wav', streaming=False)
-kill_sfx = mload('sfx/invaderkilled.wav', streaming=False)
-die_sfx = mload('sfx/explosion.wav', streaming=False)
+shoot_sfx = mload('sfx/shoot.mp3', streaming=False)
+kill_sfx = mload('sfx/invaderkilled.mp3', streaming=False)
+die_sfx = mload('sfx/explosion.mp3', streaming=False)
 
 
 def load_animation(image):
@@ -198,7 +198,7 @@ class HUD(Layer):
         super().__init__()
 
         w, h = director.get_window_size()
-        self.score_text = Label('', font_size=18)
+        self.score_text = Label('', font_size=18, italic=True, color=(0, 255, 0, 255))  # challenge, make text italic
         self.score_text.position = (20, h - 40)
 
         self.lives_text = Label('', font_size=18)
@@ -297,7 +297,7 @@ class GameLayer(Layer):
 
 
 if __name__ == '__main__':
-    song = mload('sfx/level1.ogg')
+    song = mload('sfx/level1.mp3')
     player = song.play()
     player.loop = True
 
