@@ -1,10 +1,10 @@
+from cocos.text import Label
 from cocos.sprite import Sprite
 from cocos.euclid import Vector2
 from cocos.collision_model import CircleShape, AARectShape
 from cocos.actions import IntervalAction, Delay, CallFunc, MoveBy
 from pyglet.image import ImageGrid, Animation, load
 import math
-
 
 raw = load('assets/explosion.png')
 seq = ImageGrid(raw, 1, 8)
@@ -43,9 +43,23 @@ class Enemy(Actor):
     def __init__(self, x, y, actions):
         super().__init__('tank.png', x, y)
 
+        self.total_health = 100
         self.health = 100
         self.points = 20
         self.destroyed_by_player = False
+
+        self.health_percentage = round(self.health / self.total_health * 100)
+
+        # Challenge add health label next to enemy tank
+        self.label = Label(
+            str(self.health_percentage)+'%',
+            font_name='Oswald',
+            font_size=24,
+            anchor_x='left',
+            anchor_y='center'
+        )
+        self.label.position = self.width // 2, self.height // 2
+        self.add(self.label)
 
         self.do(actions)
 
@@ -60,6 +74,3 @@ class Enemy(Actor):
         if self.health <= 0 and self.is_running:
             self.destroyed_by_player = True
             self.explode()
-
-
-

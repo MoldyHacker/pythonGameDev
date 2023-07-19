@@ -19,8 +19,6 @@ def new_game():
     return Scene(background, game_layer)
 
 
-
-
 class GameLayer(Layer):
     is_event_handler = True
 
@@ -36,12 +34,9 @@ class GameLayer(Layer):
 
         x = spawn_x + random.uniform(-10, 10)
         y = spawn_y + random.uniform(-10, 10)
+
         self.add(actors.Enemy(x, y, self.scenario.enemy_actions))
 
     def game_loop(self, _):
         if random.random() < 0.005:
             self.create_enemy()
-
-
-
-

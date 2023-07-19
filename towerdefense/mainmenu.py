@@ -27,7 +27,7 @@ class MainMenu(Menu):
         self.create_menu(items, ScaleTo(1.25, duration=0.25), ScaleTo(1.0, duration=0.25))
 
     def on_new_game(self):
-        # TODO: Challenge, change to different transition
+        # Challenge, change to different transition
         # director.push(FadeTRTransition(new_game(), duration=2)) # Original transition
         director.push(FlipX3DTransition(new_game(), duration=1))
 
