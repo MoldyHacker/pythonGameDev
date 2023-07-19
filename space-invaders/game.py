@@ -166,7 +166,8 @@ class PlayerShoot(Actor):
     ACTIVE_SHOOT = None
 
     def __init__(self, x, y):
-        super().__init__('img/laser.png', x, y)
+        missile = load_animation('img/missile2.png')  # Challenge change 'laser' or 'missile' to an animation
+        super().__init__(missile, x, y)
         self.speed = Vector2(0, 400)
         PlayerShoot.ACTIVE_SHOOT = self
 
