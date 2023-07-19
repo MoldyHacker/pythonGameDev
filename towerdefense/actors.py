@@ -43,16 +43,16 @@ class Enemy(Actor):
     def __init__(self, x, y, actions):
         super().__init__('tank.png', x, y)
 
-        self.total_health = 100
+        self.starting_health = 100
         self.health = 100
         self.points = 20
         self.destroyed_by_player = False
 
-        self.health_percentage = round(self.health / self.total_health * 100)
+        self.health_percentage = str(round(self.health / self.starting_health * 100))+'%'
 
         # Challenge add health label next to enemy tank
         self.label = Label(
-            str(self.health_percentage)+'%',
+            self.health_percentage,
             font_name='Oswald',
             font_size=24,
             anchor_x='left',
@@ -74,3 +74,30 @@ class Enemy(Actor):
         if self.health <= 0 and self.is_running:
             self.destroyed_by_player = True
             self.explode()
+
+
+class Bunker(Actor):
+    def __init__(self, x, y):
+        super().__init__('bunker.png', x, y)
+        self.health = 100
+
+    def collide(self, other):
+        if isinstance(other, Enemy):
+            self.health -= 10
+            other.explode()
+            if self.health <= 0 and self.is_running:
+                self.kill()
+
+
+class Shoot(Sprite):
+    def __init__(self, pos, travel_path, enemy):
+        super().__init__('shoot.png', position=pos)
+        self.do(MoveBy(travel_path, 0.1) +
+                CallFunc(self.kill) +
+                CallFunc(enemy.hit))
+
+
+class TurretSlot:
+  def __init__(self, pos, side):
+    self.cshape = AARectShape(Vector2(*pos), side * 0.5, side * 0.5)
+

@@ -27,6 +27,18 @@ class GameLayer(Layer):
         self.hud = hud
         self.scenario = scenario
 
+        self.bunker = actors.Bunker(*scenario.bunker_position)
+        self.add(self.bunker)
+
+        w, h = director.get_window_size()
+        cell_size = 32
+
+        self.collman_enemies = CollisionManagerGrid(0, w, 0, h, cell_size, cell_size)
+        self.collman_slots = CollisionManagerGrid(0, w, 0, h, cell_size, cell_size)
+
+        for slot in scenario.turret_slots:
+            self.collman_slots.add(actors.TurretSlot(slot, cell_size))
+
         self.schedule(self.game_loop)
 
     def create_enemy(self):
@@ -38,5 +50,14 @@ class GameLayer(Layer):
         self.add(actors.Enemy(x, y, self.scenario.enemy_actions))
 
     def game_loop(self, _):
+        self.collman_enemies.clear()
+
+        for obj in self.get_children():
+            if isinstance(obj, actors.Enemy):
+                self.collman_enemies.add(obj)
+
+        for obj in self.collman_enemies.iter_colliding(self.bunker):
+            self.bunker.collide(obj)
+
         if random.random() < 0.005:
             self.create_enemy()
