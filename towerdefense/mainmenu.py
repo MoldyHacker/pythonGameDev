@@ -4,7 +4,7 @@ from cocos.scene import Scene
 from cocos.layer import ColorLayer
 from cocos.actions import ScaleTo
 from cocos.director import director
-from cocos.scenes.transitions import FadeTRTransition
+from cocos.scenes.transitions import FlipX3DTransition
 import pyglet.app
 
 
@@ -27,7 +27,9 @@ class MainMenu(Menu):
         self.create_menu(items, ScaleTo(1.25, duration=0.25), ScaleTo(1.0, duration=0.25))
 
     def on_new_game(self):
-        director.push(FadeTRTransition(new_game(), duration=2))
+        # TODO: Challenge, change to different transition
+        # director.push(FadeTRTransition(new_game(), duration=2)) # Original transition
+        director.push(FlipX3DTransition(new_game(), duration=1))
 
 
 def new_menu():
