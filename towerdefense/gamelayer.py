@@ -39,7 +39,27 @@ class GameLayer(Layer):
         for slot in scenario.turret_slots:
             self.collman_slots.add(actors.TurretSlot(slot, cell_size))
 
+        self._score = 0
+        self._scrap = 40
+        self.turrets = []
+
         self.schedule(self.game_loop)
+
+    @property
+    def scrap(self):
+        return self._scrap
+
+    @scrap.setter
+    def scrap(self, val):
+        self._scrap = val
+
+    @property
+    def score(self):
+        return self._score
+
+    @score.setter
+    def score(self, val):
+        self._score = val
 
     def create_enemy(self):
         spawn_x, spawn_y = self.scenario.enemy_start
@@ -61,3 +81,12 @@ class GameLayer(Layer):
 
         if random.random() < 0.005:
             self.create_enemy()
+
+    def on_mouse_press(self, x, y, buttons, mod):
+        slots = self.collman_slots.objs_touching_point(x, y)
+        if len(slots) > 0 and self.scrap >= 20:
+            self.scrap -= 20
+            slot = next(iter(slots))
+            turret = actors.Turret(*slot.cshape.center)
+            self.turrets.append(turret)
+            self.add(turret)

@@ -48,7 +48,7 @@ class Enemy(Actor):
         self.points = 20
         self.destroyed_by_player = False
 
-        self.health_percentage = str(round(self.health / self.starting_health * 100))+'%'
+        self.health_percentage = str(round(self.health / self.starting_health * 100)) + '%'
 
         # Challenge add health label next to enemy tank
         self.label = Label(
@@ -98,6 +98,38 @@ class Shoot(Sprite):
 
 
 class TurretSlot:
-  def __init__(self, pos, side):
-    self.cshape = AARectShape(Vector2(*pos), side * 0.5, side * 0.5)
+    def __init__(self, pos, side):
+        self.cshape = AARectShape(Vector2(*pos), side * 0.5, side * 0.5)
+
+
+class Turret(Actor):
+    def __init__(self, x, y):
+        super().__init__('turret.png', x, y)
+        self.add(Sprite('range.png', opacity=50, scale=5))
+        self.cshape.r = self.width * 5 / 2
+        self.target = None
+        self.period = 2.0
+        self.elapsed = 0.0
+        self.schedule(self._shoot)
+
+    def _shoot(self, delta_time):
+        if self.elapsed < self.period:
+            self.elapsed += delta_time
+        elif self.target is not None:
+            self.elapsed = 0.0
+            target_path = Vector2(
+                self.target.x - self.x,
+                self.target.y - self.y
+            )
+            pos = self.cshape.center + target_path.normalized() * 20
+            self.parent.add(Shoot(pos, target_path, self.target))
+
+    def collide(self, other):
+        self.target = other
+        if self.target is not None:
+            x, y = other.x - self.x, other.y - self.y
+            angle = -math.atan2(y, x)
+            self.rotation = math.degrees(angle)
+
+
 
