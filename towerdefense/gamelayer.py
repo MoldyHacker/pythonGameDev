@@ -14,9 +14,9 @@ import random
 def new_game():
     scenario = get_scenario_1()
     background = scenario.get_background()
-    hud = None
+    hud = HUD()  # was None
     game_layer = GameLayer(hud, scenario)
-    return Scene(background, game_layer)
+    return Scene(background, game_layer, hud)
 
 
 class GameLayer(Layer):
@@ -39,8 +39,8 @@ class GameLayer(Layer):
         for slot in scenario.turret_slots:
             self.collman_slots.add(actors.TurretSlot(slot, cell_size))
 
-        self._score = 0
-        self._scrap = 40
+        self.score = 0
+        self.scrap = 40
         self.turrets = []
 
         self.schedule(self.game_loop)
@@ -52,6 +52,7 @@ class GameLayer(Layer):
     @scrap.setter
     def scrap(self, val):
         self._scrap = val
+        self.hud.update_scrap(val)
 
     @property
     def score(self):
@@ -60,6 +61,7 @@ class GameLayer(Layer):
     @score.setter
     def score(self, val):
         self._score = val
+        self.hud.update_score(val)
 
     def create_enemy(self):
         spawn_x, spawn_y = self.scenario.enemy_start
@@ -79,8 +81,12 @@ class GameLayer(Layer):
         for obj in self.collman_enemies.iter_colliding(self.bunker):
             self.bunker.collide(obj)
 
-        if random.random() < 0.005:
-            self.create_enemy()
+        for turret in self.turrets:
+            obj = next(self.collman_enemies.iter_colliding(turret), None)
+            turret.collide(obj)
+
+            if random.random() < 0.005:
+                self.create_enemy()
 
     def on_mouse_press(self, x, y, buttons, mod):
         slots = self.collman_slots.objs_touching_point(x, y)
@@ -90,3 +96,52 @@ class GameLayer(Layer):
             turret = actors.Turret(*slot.cshape.center)
             self.turrets.append(turret)
             self.add(turret)
+            # TODO: Challenge if turret is present in slot, don't place.
+
+    def remove(self, obj):
+        if obj is self.bunker:
+            director.replace(SplitColsTransition(game_over()))
+        elif isinstance(obj, actors.Enemy) and obj.destroyed_by_player:
+            self.score += obj.points
+            self.scrap += 5
+            super().remove(obj)
+
+
+class HUD(Layer):
+    def __init__(self):
+        super().__init__()
+        w, h = director.get_window_size()
+        self.score_text = self._create_text(60, h - 40)
+        self.scrap_text = self._create_text(w - 60, h - 40)
+
+    def _create_text(self, x, y):
+        text = Label(font_size=18,
+                     font_name='Oswald',
+                     anchor_x='center',
+                     anchor_y='center')
+        text.position = (x, y)
+        self.add(text)
+        return text
+
+    def update_score(self, score):
+        self.score_text.element.text = 'Score: {}'.format(score)
+
+    def update_scrap(self, scrap):
+        self.scrap_text.element.text = 'Scrap: {}'.format(scrap)
+
+
+def game_over():
+    w, h = director.get_window_size()
+    layer = Layer()
+    text = Label('Game Over',
+                 position=(w * 0.5, h * 0.5),
+                 font_name='Oswald',
+                 font_size=72,
+                 anchor_x='center',
+                 anchor_y='center')
+    layer.add(text)
+    scene = Scene(layer)
+    menu_scene = FadeTransition(mainmenu.new_menu())  # added mainmenu to the new_menu
+    show_menu = lambda: director.replace(menu_scene)
+    scene.do(Delay(3) + CallFunc(show_menu))  # removed mainmenu. from the show menu
+    return scene
