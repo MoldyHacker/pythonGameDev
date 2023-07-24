@@ -8,11 +8,12 @@ from cocos.text import Label
 from pyglet.window import key
 from pyglet.image import load as iload, ImageGrid, Animation
 from pyglet.media import load as mload
-from random import random
+import random
 
 shoot_sfx = mload('sfx/shoot.mp3', streaming=False)
 kill_sfx = mload('sfx/invaderkilled.mp3', streaming=False)
 die_sfx = mload('sfx/explosion.mp3', streaming=False)
+ms_spawn_sfx = mload('sfx/ufo_lowpitch.mp3', streaming=False)
 
 
 def load_animation(image):
@@ -23,8 +24,11 @@ def load_animation(image):
 TYPES = {
     '1': (load_animation('img/alien1.png'), 40),
     '2': (load_animation('img/alien2.png'), 20),
-    '3': (load_animation('img/alien3.png'), 10)
+    '3': (load_animation('img/alien3.png'), 10),
+    '4': ()
 }
+
+RAND_POINTS = [10, 50, 100, 200]
 
 
 class Actor(Sprite):
@@ -56,18 +60,69 @@ class Alien(Actor):
 
     def on_exit(self):
         super().on_exit()
-        if self.column:
+        if self.column is not None:
             self.column.remove(self)
+
+
+class MysteryShip(Alien):
+    mystery_ship_active = False
+
+    def __init__(self, x, y):
+        Actor.__init__(self, 'img/alien4.png', x, y)
+        # super().__init__('img/alien4.png', x, y, 4)
+        points = random.choice(RAND_POINTS)
+        self.points = points
+
+        self.speed = Vector2(150, 0)
+        self.direction = 1
+
+        self.elapsed = 0.0
+        self.period = 1.0
+
+    def on_enter(self):
+        super().on_enter()
+        MysteryShip.mystery_ship_active = True
+
+    def on_exit(self):
+        pass
+
+    def side_reached(self):
+        x, width = self.x, self.parent.width
+        return x >= width - 50 and self.direction == 1 or x <= 50 and self.direction == -1
+
+    def should_turn(self, direction):
+        if len(self) == 0:
+            return False
+        else:
+            alien = self
+
+        x, width = alien.x, alien.parent.width
+
+        return x >= width - 50 and direction == 1 or x <= 50 and direction == -1
+
+    def update(self, delta_time):
+        self.elapsed += delta_time
+        while self.elapsed >= self.period:
+            self.elapsed -= self.period
+            movement = self.direction * self.speed
+
+            if self.side_reached():
+                self.direction *= -1
+                movement = Vector2(0, -10)
+
+            self.move(movement)
 
 
 class AlienColumn:
     def __init__(self, x, y):
         alien_types = enumerate(['3', '3', '2', '2', '1'])
 
+        # traditional way
         # self.aliens = []
         # for i, alien_type in alien_types:
         #     self.aliens.append(Alien(x, i + 60, alien_type, self))
 
+        # pythonic way
         self.aliens = [
             Alien(x, y + i * 60, alien_type, self)
             for i, alien_type in alien_types
@@ -91,7 +146,7 @@ class AlienColumn:
         self.rate_of_fire *= 5
 
     def shoot(self):
-        if random() < 0.001 and len(self.aliens) > 0:
+        if random.random() < 0.001 and len(self.aliens) > 0:
             x, y = self.aliens[0].position
             return AlienShoot(x, y - 50)
         else:
@@ -276,10 +331,19 @@ class GameLayer(Layer):
 
         self.swarm.update(delta_time)
 
+        if random.random() < 0.00001:
+            self.spawn_mystery_ship(50, self.height - 50)
+
     def create_swarm(self, x, y):
         self.swarm = Swarm(x, y)
         for alien in self.swarm:
             self.add(alien)
+
+    def spawn_mystery_ship(self, x, y):
+        self.mystery_ship = MysteryShip(x, y)
+        if not self.mystery_ship.mystery_ship_active:
+            self.add(self.mystery_ship)
+            ms_spawn_sfx.play()
 
     def respawn_player(self):
         self.lives -= 1
