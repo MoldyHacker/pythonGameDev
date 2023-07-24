@@ -8,14 +8,14 @@ Describe what modifications you made and the outcome.
   - If position exceeds screen boundaries, set position to the boundary
 
 ## Q2: Create a MysteryShip class that extends Alien
-A mystery ship may be worth 10, 50, 100, or 200 points (chosen at random when created)
-It always uses "img/alien4.png" as its sprite image
-It has a horizontal speed of 150 pixels per second
-Its update() method performs its movement
+- A mystery ship may be worth 10, 50, 100, or 200 points (chosen at random when created)
+- It always uses "img/alien4.png" as its sprite image
+- It has a horizontal speed of 150 pixels per second
+- Its update() method performs its movement
 
-The GameLayer has a small random chance to spawn a MysteryShip every frame
-It spawns the ship 50 pixels from the top left corner of the screen
-When a MysteryShip spawns, play the sound effect "sfx/ufo_lowpitch.wav"
+- The GameLayer has a small random chance to spawn a MysteryShip every frame
+- It spawns the ship 50 pixels from the top left corner of the screen
+- When a MysteryShip spawns, play the sound effect "sfx/ufo_lowpitch.wav"
  
 
 Describe what modifications you made and the outcome.
