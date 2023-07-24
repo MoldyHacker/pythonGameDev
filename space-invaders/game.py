@@ -204,9 +204,15 @@ class PlayerCannon(Actor):
 
         print(left_edge, self.x, right_edge)
 
-        # TODO: fix the edge collision bug
-        if left_edge <= self.x <= right_edge:
-            self.move(self.speed * horizontal_movement * delta_time)
+        # Calculate the new position based on the movement
+        new_x = self.x + self.speed.x * horizontal_movement * delta_time
+
+        if new_x < left_edge:
+            self.x = left_edge
+        elif new_x > right_edge:
+            self.x = right_edge
+        else:
+            self.x = new_x
 
         is_firing = keyboard[key.SPACE]
         if PlayerShoot.ACTIVE_SHOOT is None and is_firing:
