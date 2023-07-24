@@ -154,6 +154,7 @@ class AlienColumn:
 
 
 class Swarm:
+    swarm_in_play = True
     def __init__(self, x, y):
         self.columns = [
             AlienColumn(x + i * 60, y)
@@ -186,6 +187,7 @@ class Swarm:
 
             for alien in self:
                 alien.move(movement)
+
 
 
 class PlayerCannon(Actor):
@@ -302,6 +304,8 @@ class GameLayer(Layer):
 
         self.create_swarm(100, 300)
 
+        self.remaining_aliens = len(self.swarm.columns) * len(self.swarm.columns[0].aliens)
+
         self.schedule(self.game_loop)
 
     def create_player(self):
@@ -337,8 +341,12 @@ class GameLayer(Layer):
 
         self.swarm.update(delta_time)
 
-        if random.random() < 0.00001:
+        if random.random() < 0.0001:
             self.spawn_mystery_ship(50, self.height - 50)
+
+    def on_win(self):
+        self.unschedule(self.game_loop)
+        self.hud.show_game_over('You Win!')
 
     def create_swarm(self, x, y):
         self.swarm = Swarm(x, y)
@@ -352,7 +360,7 @@ class GameLayer(Layer):
             ms_spawn_sfx.play()
 
     def respawn_player(self):
-        self.lives -= 1
+        self.lives -= 0  # this is where lives are deducted. Could add boolean flag to enable a cheat mode
         if self.lives < 0:
             self.unschedule(self.game_loop)
             self.hud.show_game_over('Game Over')
@@ -363,6 +371,10 @@ class GameLayer(Layer):
         if actor is not None:
             for other in self.collman.iter_colliding(actor):
                 actor.collide(other)
+                if isinstance(other, Alien):
+                    self.remaining_aliens -= 1
+                    if self.remaining_aliens == 0:
+                        self.on_win()
                 return True
         return False
 
