@@ -360,7 +360,7 @@ class GameLayer(Layer):
             ms_spawn_sfx.play()
 
     def respawn_player(self):
-        self.lives -= 0  # this is where lives are deducted. Could add boolean flag to enable a cheat mode
+        self.lives -= 1  # this is where lives are deducted. Could add boolean flag to enable a cheat mode
         if self.lives < 0:
             self.unschedule(self.game_loop)
             self.hud.show_game_over('Game Over')
