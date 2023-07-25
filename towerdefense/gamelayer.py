@@ -63,6 +63,15 @@ class GameLayer(Layer):
         self._score = val
         self.hud.update_score(val)
 
+    # @property
+    # def bunker_health(self):
+    #     return self._bunker_health
+    #
+    # @bunker_health.setter
+    # def bunker_health(self, val):
+    #     self._bunker_health = val
+    #     self.hud.update_bunker_health(val)
+
     def create_enemy(self):
         spawn_x, spawn_y = self.scenario.enemy_start
 
@@ -85,8 +94,8 @@ class GameLayer(Layer):
             obj = next(self.collman_enemies.iter_colliding(turret), None)
             turret.collide(obj)
 
-            if random.random() < 0.005:
-                self.create_enemy()
+        if random.random() < 0.005:
+            self.create_enemy()
 
     def on_mouse_press(self, x, y, buttons, mod):
         slots = self.collman_slots.objs_touching_point(x, y)
@@ -104,7 +113,7 @@ class GameLayer(Layer):
         elif isinstance(obj, actors.Enemy) and obj.destroyed_by_player:
             self.score += obj.points
             self.scrap += 5
-            super().remove(obj)
+        super().remove(obj)
 
 
 class HUD(Layer):
@@ -113,6 +122,7 @@ class HUD(Layer):
         w, h = director.get_window_size()
         self.score_text = self._create_text(60, h - 40)
         self.scrap_text = self._create_text(w - 60, h - 40)
+        self.bunker_health_text = self._create_text(w // 2, h - 40)
 
     def _create_text(self, x, y):
         text = Label(font_size=18,
@@ -128,6 +138,9 @@ class HUD(Layer):
 
     def update_scrap(self, scrap):
         self.scrap_text.element.text = 'Scrap: {}'.format(scrap)
+
+    def update_bunker_health(self, bunker_health):
+        self.bunker_health_text.element.text = 'Bunker Health: {}'.format(bunker_health)
 
 
 def game_over():

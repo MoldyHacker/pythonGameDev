@@ -51,15 +51,15 @@ class Enemy(Actor):
         self.health_percentage = str(round(self.health / self.starting_health * 100)) + '%'
 
         # Challenge add health label next to enemy tank
-        self.label = Label(
+        self.health_label = Label(
             self.health_percentage,
             font_name='Oswald',
             font_size=24,
             anchor_x='left',
             anchor_y='center'
         )
-        self.label.position = self.width // 2, self.height // 2
-        self.add(self.label)
+        self.health_label.position = self.width // 2, self.height // 2
+        self.add(self.health_label)
 
         self.do(actions)
 
@@ -69,7 +69,8 @@ class Enemy(Actor):
 
     def hit(self):
         self.health -= 25
-        self.do(Hit())
+        # self.do(Hit())
+        self.health_label.element.text = "{}%".format(self.health)
 
         if self.health <= 0 and self.is_running:
             self.destroyed_by_player = True
@@ -92,9 +93,7 @@ class Bunker(Actor):
 class Shoot(Sprite):
     def __init__(self, pos, travel_path, enemy):
         super().__init__('shoot.png', position=pos)
-        self.do(MoveBy(travel_path, 0.1) +
-                CallFunc(self.kill) +
-                CallFunc(enemy.hit))
+        self.do(MoveBy(travel_path, 0.1) + CallFunc(self.kill) + CallFunc(enemy.hit))
 
 
 class TurretSlot:
@@ -108,7 +107,7 @@ class Turret(Actor):
         self.add(Sprite('range.png', opacity=50, scale=5))
         self.cshape.r = self.width * 5 / 2
         self.target = None
-        self.period = 2.0
+        self.period = 1.0
         self.elapsed = 0.0
         self.schedule(self._shoot)
 
@@ -117,10 +116,7 @@ class Turret(Actor):
             self.elapsed += delta_time
         elif self.target is not None:
             self.elapsed = 0.0
-            target_path = Vector2(
-                self.target.x - self.x,
-                self.target.y - self.y
-            )
+            target_path = Vector2(self.target.x - self.x, self.target.y - self.y)
             pos = self.cshape.center + target_path.normalized() * 20
             self.parent.add(Shoot(pos, target_path, self.target))
 
