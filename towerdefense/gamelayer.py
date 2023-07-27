@@ -41,6 +41,7 @@ class GameLayer(Layer):
 
         self.score = 0
         self.scrap = 40
+        self.bunker_health = self.bunker.health
         self.turrets = []
 
         self.schedule(self.game_loop)
@@ -63,14 +64,14 @@ class GameLayer(Layer):
         self._score = val
         self.hud.update_score(val)
 
-    # @property
-    # def bunker_health(self):
-    #     return self._bunker_health
-    #
-    # @bunker_health.setter
-    # def bunker_health(self, val):
-    #     self._bunker_health = val
-    #     self.hud.update_bunker_health(val)
+    @property
+    def bunker_health(self):
+        return self._bunker_health
+
+    @bunker_health.setter
+    def bunker_health(self, val):
+        self._bunker_health = val
+        self.hud.update_bunker_health(val)
 
     def create_enemy(self):
         spawn_x, spawn_y = self.scenario.enemy_start
@@ -89,6 +90,7 @@ class GameLayer(Layer):
 
         for obj in self.collman_enemies.iter_colliding(self.bunker):
             self.bunker.collide(obj)
+            self.hud.update_bunker_health(self.bunker.health)
 
         for turret in self.turrets:
             obj = next(self.collman_enemies.iter_colliding(turret), None)

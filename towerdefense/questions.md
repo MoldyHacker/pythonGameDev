@@ -16,6 +16,14 @@ Describe what modifications you made and the outcome.
 
 Describe what modifications you made and the outcome.
 
+### My Solution:
+    I made all my ajustments in the gamelayer
+    First to the GameLayer class I added a bunker_health variable and set that to the health of the bunker obj
+    Then I created a @property and a @setter for the bunker that performs the same actions as the score and setters
+    In the HUD class I created the text variable bunker_health_text and set it's position to the center of the screen
+    Also in the HUD class I defined a function update_bunker_health that updates the bunker text element with the passed in value.
+    Finally in the game_loop I used this update_bunker_health func passing in the current bunker health at every collision with the bunker.
+
 ## Q4: Create a HealthBar class that extends Sprite
 It is initialized with the image "health_bar.png", a color overlay of red, and a position of (-20, 0)
 Its constructor adds a second sprite as a child of itself, also using "health_bar.png", a green color overlay, and position (0, 0)
