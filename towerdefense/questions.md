@@ -52,4 +52,12 @@ When an Enemy object is hit, update the health bar
 Describe what modifications you made and the outcome.
 
 ### My Solution
-    
+    I created the HealthBar class which inherited all it's attributes as instructed. 
+    Then I added the green_sprite and assigned its attributes as described.
+    Then I created an update_percent function.
+        This function takes in a percentage.
+        It clamps that percentage between 0 and 100
+        It then scales the green_sprite in the y direction
+        And then it takes that scaled height and locks it to one height.
+    From there in the Enemy actory  constructor i instatiated the HealthBar, positioned it, and added it to the Enemy.
+    Lastly I updated the hit function to trigger the update_percent function with the percentage of the tanks current health(every time the take takes a hit.)

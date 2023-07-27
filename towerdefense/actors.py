@@ -18,6 +18,26 @@ tank_explosion_sfx = mload('assets/sfx/hit.mp3')
 turret_placement_sfx = mload('assets/sfx/heavy_thud.mp3')
 
 
+class HealthBar(Sprite):
+    def __init__(self):
+        super().__init__('assets/health_bar.png', color=(255, 0, 0), position=(-20, 0))
+
+        self.green_sprite = Sprite('assets/health_bar.png', color=(0, 255, 0), position=(0, 0))
+        self.add(self.green_sprite)
+
+    def update_percent(self, percent_full):
+        # Clamp the percentage between 0 and 100
+        percent_full = max(0, min(100, percent_full))
+
+        # Update the scale_y property of the green sprite based on the percentage
+        self.green_sprite.scale_y = percent_full / 100
+
+        # lock the green sprite to one side
+        full_height = self.height  # The height of the overall health bar
+        green_height = self.green_sprite.height * self.green_sprite.scale_y
+        self.green_sprite.position = (0, (full_height - green_height) / 2)
+
+
 class Actor(Sprite):
     def __init__(self, image, x, y):
         super().__init__(image)
@@ -55,18 +75,22 @@ class Enemy(Actor):
         self.points = 20
         self.destroyed_by_player = False
 
-        self.health_percentage = str(round(self.health / self.starting_health * 100)) + '%'
+        # self.health_percentage = str(round(self.health / self.starting_health * 100)) + '%'
 
         # Challenge add health label next to enemy tank
-        self.health_label = Label(
-            self.health_percentage,
-            font_name='Oswald',
-            font_size=24,
-            anchor_x='left',
-            anchor_y='center'
-        )
-        self.health_label.position = self.width // 2, self.height // 2
-        self.add(self.health_label)
+        # self.health_label = Label(
+        #     self.health_percentage,
+        #     font_name='Oswald',
+        #     font_size=24,
+        #     anchor_x='left',
+        #     anchor_y='center'
+        # )
+        # self.health_label.position = self.width // 2, self.height // 2
+        # self.add(self.health_label)
+
+        self.health_bar = HealthBar()
+        self.health_bar.position = self.width // 2 + 5, self.height + 5
+        self.add(self.health_bar)
 
         self.do(actions)
 
@@ -78,7 +102,8 @@ class Enemy(Actor):
     def hit(self):
         self.health -= 25
         # self.do(Hit())
-        self.health_label.element.text = "{}%".format(self.health)
+        # self.health_label.element.text = "{}%".format(self.health)
+        self.health_bar.update_percent(self.health / self.starting_health * 100)
 
         if self.health <= 0 and self.is_running:
             self.destroyed_by_player = True
