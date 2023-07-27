@@ -4,6 +4,21 @@
 .OGG or .MP3 files for music
 Describe what modifications you made and the outcome.
 
+### My Solution
+    After a quick google search I found https://pixabay.com/sound-effects/ for sound effects.
+    I had to alter some of the files to make them play at a resonable volume.
+    But I started with the actor file.
+    
+    I assigned sound files to turret placements, turret shots, tanks exploding, and the bunker exploding.
+    
+    I added the tank explosion sound in the explode class of the Enemy
+    I added the bunker explosion in the Bunker class under the collide function.    
+    I added the turret shot sound in the Shoot class so that it would only make a sound when fired.
+    I added the turret placement sound to the turret constructor so it would only be played once.
+
+    I also added background music. I was going to add one for the main menu and one for the game. but i couldn't get the music to stop playing.
+    
+
 ## Q2: Using a tile map editor, create a new TMX file containing a custom map. You can reuse the desert tileset ("assets/desert.png") or search for a new image.
 
 Modify scenario.py to make your map playable.
@@ -35,3 +50,6 @@ When an Enemy object is hit, update the health bar
  
 
 Describe what modifications you made and the outcome.
+
+### My Solution
+    

@@ -6,6 +6,10 @@ from cocos.actions import ScaleTo
 from cocos.director import director
 from cocos.scenes.transitions import FlipX3DTransition
 import pyglet.app
+from pyglet.media import load as mload
+
+# menu_music = mload('assets/sfx/menu-music.mp3')
+# can't end loop.
 
 
 class MainMenu(Menu):

@@ -155,6 +155,7 @@ class AlienColumn:
 
 class Swarm:
     swarm_in_play = True
+
     def __init__(self, x, y):
         self.columns = [
             AlienColumn(x + i * 60, y)
@@ -187,7 +188,6 @@ class Swarm:
 
             for alien in self:
                 alien.move(movement)
-
 
 
 class PlayerCannon(Actor):

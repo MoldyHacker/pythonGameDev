@@ -1,3 +1,4 @@
+import pyglet.media
 from cocos.text import Label
 from cocos.sprite import Sprite
 from cocos.euclid import Vector2
@@ -5,10 +6,16 @@ from cocos.collision_model import CircleShape, AARectShape
 from cocos.actions import IntervalAction, Delay, CallFunc, MoveBy
 from pyglet.image import ImageGrid, Animation, load
 import math
+from pyglet.media import load as mload
 
 raw = load('assets/explosion.png')
 seq = ImageGrid(raw, 1, 8)
 explosion_img = Animation.from_image_sequence(seq, 0.07, False)
+
+turret_shot_sfx = mload('assets/sfx/cannon-shot.mp3')
+bunker_explosion_sfx = mload('assets/sfx/explosion.mp3')
+tank_explosion_sfx = mload('assets/sfx/hit.mp3')
+turret_placement_sfx = mload('assets/sfx/heavy_thud.mp3')
 
 
 class Actor(Sprite):
@@ -65,6 +72,7 @@ class Enemy(Actor):
 
     def explode(self):
         self.parent.add(Explosion(self.position))
+        tank_explosion_sfx.play()
         self.kill()
 
     def hit(self):
@@ -87,6 +95,7 @@ class Bunker(Actor):
             self.health -= 10
             other.explode()
             if self.health <= 0 and self.is_running:
+                bunker_explosion_sfx.play()
                 self.kill()
 
 
@@ -94,6 +103,7 @@ class Shoot(Sprite):
     def __init__(self, pos, travel_path, enemy):
         super().__init__('shoot.png', position=pos)
         self.do(MoveBy(travel_path, 0.1) + CallFunc(self.kill) + CallFunc(enemy.hit))
+        turret_shot_sfx.play()
 
 
 class TurretSlot:
@@ -110,6 +120,7 @@ class Turret(Actor):
         self.period = 1.0
         self.elapsed = 0.0
         self.schedule(self._shoot)
+        turret_placement_sfx.play()
 
     def _shoot(self, delta_time):
         if self.elapsed < self.period:
@@ -126,6 +137,3 @@ class Turret(Actor):
             x, y = other.x - self.x, other.y - self.y
             angle = -math.atan2(y, x)
             self.rotation = math.degrees(angle)
-
-
-
